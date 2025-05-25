@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.lab_web_sys.mapper.NewsMapper">
+    
+    <resultMap type="News" id="NewsResult">
+        <result property="id"    column="id"    />
+        <result property="newsTime"    column="news_time"    />
+        <result property="newsTitle"    column="news_title"    />
+        <result property="newsImageUrl"    column="news_image_url"    />
+        <result property="newsLink"    column="news_link"    />
+    </resultMap>
+
+    <sql id="selectNewsVo">
+        select id, news_time, news_title, news_image_url, news_link from news
+    </sql>
+
+    <select id="selectNewsList" parameterType="News" resultMap="NewsResult">
+        <include refid="selectNewsVo"/>
+        <where>  
+            <if test="newsTime != null "> and news_time = #{newsTime}</if>
+            <if test="newsTitle != null  and newsTitle != ''"> and news_title like concat('%', #{newsTitle}, '%')</if>
+            <if test="newsImageUrl != null  and newsImageUrl != ''"> and news_image_url = #{newsImageUrl}</if>
+            <if test="newsLink != null  and newsLink != ''"> and news_link = #{newsLink}</if>
+        </where>
+        order by news_time desc, id desc
+    </select>
+    
+    <select id="selectNewsById" parameterType="Long" resultMap="NewsResult">
+        <include refid="selectNewsVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertNews" parameterType="News" useGeneratedKeys="true" keyProperty="id">
+        insert into news
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="newsTime != null">news_time,</if>
+            <if test="newsTitle != null and newsTitle != ''">news_title,</if>
+            <if test="newsImageUrl != null">news_image_url,</if>
+            <if test="newsLink != null and newsLink != ''">news_link,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="newsTime != null">#{newsTime},</if>
+            <if test="newsTitle != null and newsTitle != ''">#{newsTitle},</if>
+            <if test="newsImageUrl != null">#{newsImageUrl},</if>
+            <if test="newsLink != null and newsLink != ''">#{newsLink},</if>
+         </trim>
+    </insert>
+
+    <update id="updateNews" parameterType="News">
+        update news
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="newsTime != null">news_time = #{newsTime},</if>
+            <if test="newsTitle != null and newsTitle != ''">news_title = #{newsTitle},</if>
+            <if test="newsImageUrl != null">news_image_url = #{newsImageUrl},</if>
+            <if test="newsLink != null and newsLink != ''">news_link = #{newsLink},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteNewsById" parameterType="Long">
+        delete from news where id = #{id}
+    </delete>
+
+    <delete id="deleteNewsByIds" parameterType="String">
+        delete from news where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

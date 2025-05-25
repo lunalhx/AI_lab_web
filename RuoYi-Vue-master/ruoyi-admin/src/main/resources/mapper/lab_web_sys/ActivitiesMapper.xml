@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.lab_web_sys.mapper.ActivitiesMapper">
+    
+    <resultMap type="Activities" id="ActivitiesResult">
+        <result property="id"    column="id"    />
+        <result property="activityTime"    column="activity_time"    />
+        <result property="activityTitle"    column="activity_title"    />
+        <result property="activityLocation"    column="activity_location"    />
+        <result property="activityHost"    column="activity_host"    />
+        <result property="activityRecorder"    column="activity_recorder"    />
+        <result property="activityAttendees"    column="activity_attendees"    />
+        <result property="activityContent"    column="activity_content"    />
+        <result property="activityImageUrl1"    column="activity_image_url1"    />
+        <result property="activityImageUrl2"    column="activity_image_url2"    />
+        <result property="activityImageUrl3"    column="activity_image_url3"    />
+    </resultMap>
+
+    <sql id="selectActivitiesVo">
+        select id, activity_time, activity_title, activity_location, activity_host, activity_recorder, activity_attendees, activity_content, activity_image_url1, activity_image_url2, activity_image_url3 from activities
+    </sql>
+
+    <select id="selectActivitiesList" parameterType="Activities" resultMap="ActivitiesResult">
+        <include refid="selectActivitiesVo"/>
+        <where>  
+            <if test="activityTitle != null  and activityTitle != ''"> and activity_title like concat('%', #{activityTitle}, '%')</if>
+        </where>
+        order by activity_time desc, id desc
+    </select>
+    
+    <select id="selectActivitiesById" parameterType="Long" resultMap="ActivitiesResult">
+        <include refid="selectActivitiesVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertActivities" parameterType="Activities" useGeneratedKeys="true" keyProperty="id">
+        insert into activities
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="activityTime != null">activity_time,</if>
+            <if test="activityTitle != null and activityTitle != ''">activity_title,</if>
+            <if test="activityLocation != null and activityLocation != ''">activity_location,</if>
+            <if test="activityHost != null">activity_host,</if>
+            <if test="activityRecorder != null">activity_recorder,</if>
+            <if test="activityAttendees != null">activity_attendees,</if>
+            <if test="activityContent != null">activity_content,</if>
+            <if test="activityImageUrl1 != null">activity_image_url1,</if>
+            <if test="activityImageUrl2 != null">activity_image_url2,</if>
+            <if test="activityImageUrl3 != null">activity_image_url3,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="activityTime != null">#{activityTime},</if>
+            <if test="activityTitle != null and activityTitle != ''">#{activityTitle},</if>
+            <if test="activityLocation != null and activityLocation != ''">#{activityLocation},</if>
+            <if test="activityHost != null">#{activityHost},</if>
+            <if test="activityRecorder != null">#{activityRecorder},</if>
+            <if test="activityAttendees != null">#{activityAttendees},</if>
+            <if test="activityContent != null">#{activityContent},</if>
+            <if test="activityImageUrl1 != null">#{activityImageUrl1},</if>
+            <if test="activityImageUrl2 != null">#{activityImageUrl2},</if>
+            <if test="activityImageUrl3 != null">#{activityImageUrl3},</if>
+         </trim>
+    </insert>
+
+    <update id="updateActivities" parameterType="Activities">
+        update activities
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="activityTime != null">activity_time = #{activityTime},</if>
+            <if test="activityTitle != null and activityTitle != ''">activity_title = #{activityTitle},</if>
+            <if test="activityLocation != null and activityLocation != ''">activity_location = #{activityLocation},</if>
+            <if test="activityHost != null">activity_host = #{activityHost},</if>
+            <if test="activityRecorder != null">activity_recorder = #{activityRecorder},</if>
+            <if test="activityAttendees != null">activity_attendees = #{activityAttendees},</if>
+            <if test="activityContent != null">activity_content = #{activityContent},</if>
+            <if test="activityImageUrl1 != null">activity_image_url1 = #{activityImageUrl1},</if>
+            <if test="activityImageUrl2 != null">activity_image_url2 = #{activityImageUrl2},</if>
+            <if test="activityImageUrl3 != null">activity_image_url3 = #{activityImageUrl3},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteActivitiesById" parameterType="Long">
+        delete from activities where id = #{id}
+    </delete>
+
+    <delete id="deleteActivitiesByIds" parameterType="String">
+        delete from activities where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.lab_web_sys.mapper.NotificationsMapper">
+    
+    <resultMap type="Notifications" id="NotificationsResult">
+        <result property="id"    column="id"    />
+        <result property="notificationTime"    column="notification_time"    />
+        <result property="notificationTitle"    column="notification_title"    />
+        <result property="notificationContent"    column="notification_content"    />
+        <result property="notificationFileUrl"    column="notification_file_url"    />
+    </resultMap>
+
+    <sql id="selectNotificationsVo">
+        select id, notification_time, notification_title, notification_content, notification_file_url from notifications
+    </sql>
+
+    <select id="selectNotificationsList" parameterType="Notifications" resultMap="NotificationsResult">
+        <include refid="selectNotificationsVo"/>
+        <where>  
+            <if test="notificationTitle != null  and notificationTitle != ''"> and notification_title like concat('%', #{notificationTitle}, '%')</if>
+        </where>
+        order by notification_time desc, id desc
+    </select>
+    
+    <select id="selectNotificationsById" parameterType="Long" resultMap="NotificationsResult">
+        <include refid="selectNotificationsVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertNotifications" parameterType="Notifications" useGeneratedKeys="true" keyProperty="id">
+        insert into notifications
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="notificationTime != null">notification_time,</if>
+            <if test="notificationTitle != null and notificationTitle != ''">notification_title,</if>
+            <if test="notificationContent != null and notificationContent != ''">notification_content,</if>
+            <if test="notificationFileUrl != null and notificationFileUrl != ''">notification_file_url,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="notificationTime != null">#{notificationTime},</if>
+            <if test="notificationTitle != null and notificationTitle != ''">#{notificationTitle},</if>
+            <if test="notificationContent != null and notificationContent != ''">#{notificationContent},</if>
+            <if test="notificationFileUrl != null and notificationFileUrl != ''">#{notificationFileUrl},</if>
+         </trim>
+    </insert>
+
+    <update id="updateNotifications" parameterType="Notifications">
+        update notifications
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="notificationTime != null">notification_time = #{notificationTime},</if>
+            <if test="notificationTitle != null and notificationTitle != ''">notification_title = #{notificationTitle},</if>
+            <if test="notificationContent != null and notificationContent != ''">notification_content = #{notificationContent},</if>
+            <if test="notificationFileUrl != null and notificationFileUrl != ''">notification_file_url = #{notificationFileUrl},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteNotificationsById" parameterType="Long">
+        delete from notifications where id = #{id}
+    </delete>
+
+    <delete id="deleteNotificationsByIds" parameterType="String">
+        delete from notifications where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>
