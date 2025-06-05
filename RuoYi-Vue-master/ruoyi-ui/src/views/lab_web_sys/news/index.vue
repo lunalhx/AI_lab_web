@@ -78,7 +78,15 @@
         </template>
       </el-table-column>
       <el-table-column label="新闻标题" align="center" prop="newsTitle" />
-      <el-table-column label="新闻图片" align="center" prop="newsImageUrl" />
+      <el-table-column label="新闻图片" align="center" prop="newsImageUrl">
+        <template slot-scope="scope">
+          <el-image
+            style="width: 100px; height: 100px"
+            :src="scope.row.newsImageUrl"
+            :preview-src-list="[scope.row.newsImageUrl]">
+          </el-image>
+        </template>
+      </el-table-column>
       <el-table-column label="新闻链接" align="center" prop="newsLink" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
@@ -99,7 +107,7 @@
         </template>
       </el-table-column>
     </el-table>
-    
+
     <pagination
       v-show="total>0"
       :total="total"
@@ -123,7 +131,15 @@
           <el-input v-model="form.newsTitle" placeholder="请输入新闻标题" />
         </el-form-item>
         <el-form-item label="新闻图片" prop="newsImageUrl">
-          <el-input v-model="form.newsImageUrl" type="textarea" placeholder="请输入内容" />
+          <el-upload
+            class="avatar-uploader"
+            :action="'/dev-api/api/public/file/upload'"
+            :show-file-list="false"
+            :on-success="handleUploadSuccess"
+            :before-upload="beforeUpload">
+            <img v-if="form.newsImageUrl" :src="form.newsImageUrl" class="avatar" @error="handleImageError">
+            <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+          </el-upload>
         </el-form-item>
         <el-form-item label="新闻链接" prop="newsLink">
           <el-input v-model="form.newsLink" type="textarea" placeholder="请输入内容" />
@@ -283,7 +299,64 @@ export default {
       this.download('lab_web_sys/news/export', {
         ...this.queryParams
       }, `news_${new Date().getTime()}.xlsx`)
+    },
+    // 上传成功回调
+    handleUploadSuccess(res, file) {
+      console.log('上传响应:', res);
+      if (res.code === 200) {
+        this.form.newsImageUrl = res.msg;
+        console.log('设置图片URL:', this.form.newsImageUrl);
+        this.$modal.msgSuccess("上传成功");
+      } else {
+        this.$modal.msgError(res.msg || "上传失败");
+      }
+    },
+    // 图片加载错误处理
+    handleImageError(e) {
+      console.error('图片加载失败:', e);
+      this.$message.error('图片加载失败，请检查图片地址');
+    },
+    // 上传前校验
+    beforeUpload(file) {
+      const isImage = file.type.indexOf('image/') === 0;
+      const isLt2M = file.size / 1024 / 1024 < 2;
+
+      if (!isImage) {
+        this.$message.error('上传文件只能是图片格式!');
+        return false;
+      }
+      if (!isLt2M) {
+        this.$message.error('上传图片大小不能超过 2MB!');
+        return false;
+      }
+      return true;
     }
   }
 }
 </script>
+
+<style>
+.avatar-uploader .el-upload {
+  border: 1px dashed #d9d9d9;
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+.avatar-uploader .el-upload:hover {
+  border-color: #409EFF;
+}
+.avatar-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 178px;
+  height: 178px;
+  line-height: 178px;
+  text-align: center;
+}
+.avatar {
+  width: 178px;
+  height: 178px;
+  display: block;
+}
+</style>

@@ -75,9 +75,33 @@
       <el-table-column label="记录人" align="center" prop="activityRecorder" />
       <el-table-column label="参会人员名单 (例如：张三,李四,王五)" align="center" prop="activityAttendees" />
       <el-table-column label="活动详细内容" align="center" prop="activityContent" />
-      <el-table-column label="活动图片链接1" align="center" prop="activityImageUrl1" />
-      <el-table-column label="活动图片链接2" align="center" prop="activityImageUrl2" />
-      <el-table-column label="活动图片链接3" align="center" prop="activityImageUrl3" />
+      <el-table-column label="活动图片链接1" align="center" prop="activityImageUrl1">
+        <template slot-scope="scope">
+          <el-image 
+            style="width: 100px; height: 100px"
+            :src="scope.row.activityImageUrl1"
+            :preview-src-list="[scope.row.activityImageUrl1]">
+          </el-image>
+        </template>
+      </el-table-column>
+      <el-table-column label="活动图片链接2" align="center" prop="activityImageUrl2">
+        <template slot-scope="scope">
+          <el-image 
+            style="width: 100px; height: 100px"
+            :src="scope.row.activityImageUrl2"
+            :preview-src-list="[scope.row.activityImageUrl2]">
+          </el-image>
+        </template>
+      </el-table-column>
+      <el-table-column label="活动图片链接3" align="center" prop="activityImageUrl3">
+        <template slot-scope="scope">
+          <el-image 
+            style="width: 100px; height: 100px"
+            :src="scope.row.activityImageUrl3"
+            :preview-src-list="[scope.row.activityImageUrl3]">
+          </el-image>
+        </template>
+      </el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
@@ -136,13 +160,37 @@
           <editor v-model="form.activityContent" :min-height="192"/>
         </el-form-item>
         <el-form-item label="活动图片链接1" prop="activityImageUrl1">
-          <el-input v-model="form.activityImageUrl1" type="textarea" placeholder="请输入内容" />
+          <el-upload
+            class="avatar-uploader"
+            :action="'/dev-api/api/public/file/upload'"
+            :show-file-list="false"
+            :on-success="(res) => handleUploadSuccess(res, 'activityImageUrl1')"
+            :before-upload="beforeUpload">
+            <img v-if="form.activityImageUrl1" :src="form.activityImageUrl1" class="avatar" @error="handleImageError">
+            <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+          </el-upload>
         </el-form-item>
         <el-form-item label="活动图片链接2" prop="activityImageUrl2">
-          <el-input v-model="form.activityImageUrl2" type="textarea" placeholder="请输入内容" />
+          <el-upload
+            class="avatar-uploader"
+            :action="'/dev-api/api/public/file/upload'"
+            :show-file-list="false"
+            :on-success="(res) => handleUploadSuccess(res, 'activityImageUrl2')"
+            :before-upload="beforeUpload">
+            <img v-if="form.activityImageUrl2" :src="form.activityImageUrl2" class="avatar" @error="handleImageError">
+            <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+          </el-upload>
         </el-form-item>
         <el-form-item label="活动图片链接3" prop="activityImageUrl3">
-          <el-input v-model="form.activityImageUrl3" type="textarea" placeholder="请输入内容" />
+          <el-upload
+            class="avatar-uploader"
+            :action="'/dev-api/api/public/file/upload'"
+            :show-file-list="false"
+            :on-success="(res) => handleUploadSuccess(res, 'activityImageUrl3')"
+            :before-upload="beforeUpload">
+            <img v-if="form.activityImageUrl3" :src="form.activityImageUrl3" class="avatar" @error="handleImageError">
+            <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+          </el-upload>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -302,7 +350,64 @@ export default {
       this.download('lab_web_sys/activities/export', {
         ...this.queryParams
       }, `activities_${new Date().getTime()}.xlsx`)
-    }
+    },
+    // 上传成功回调
+    handleUploadSuccess(res, field) {
+      console.log('上传响应:', res);
+      if (res.code === 200) {
+        this.form[field] = res.msg;
+        console.log('设置图片URL:', this.form[field]);
+        this.$modal.msgSuccess("上传成功");
+      } else {
+        this.$modal.msgError(res.msg || "上传失败");
+      }
+    },
+    // 图片加载错误处理
+    handleImageError(e) {
+      console.error('图片加载失败:', e);
+      this.$message.error('图片加载失败，请检查图片地址');
+    },
+    // 上传前校验
+    beforeUpload(file) {
+      const isImage = file.type.indexOf('image/') === 0;
+      const isLt2M = file.size / 1024 / 1024 < 2;
+
+      if (!isImage) {
+        this.$message.error('上传文件只能是图片格式!');
+        return false;
+      }
+      if (!isLt2M) {
+        this.$message.error('上传图片大小不能超过 2MB!');
+        return false;
+      }
+      return true;
+    },
   }
 }
 </script>
+
+<style>
+.avatar-uploader .el-upload {
+  border: 1px dashed #d9d9d9;
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+.avatar-uploader .el-upload:hover {
+  border-color: #409EFF;
+}
+.avatar-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 178px;
+  height: 178px;
+  line-height: 178px;
+  text-align: center;
+}
+.avatar {
+  width: 178px;
+  height: 178px;
+  display: block;
+}
+</style>

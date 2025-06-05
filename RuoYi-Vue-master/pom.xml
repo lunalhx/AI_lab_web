@@ -41,6 +41,12 @@
     <dependencyManagement>
         <dependencies>
 
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>fastjson</artifactId>
+                <version>1.2.83_noneautotype</version> <!-- 可使用最新版本 -->
+            </dependency>
+
             <!-- 覆盖SpringFramework的依赖配置-->
             <dependency>
                 <groupId>org.springframework</groupId>
